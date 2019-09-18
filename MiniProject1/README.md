@@ -3,7 +3,7 @@
 ### Prerequisites
 
 1. Set up python and pip
-Note that the steps in the shell scripts are the ones for MacOS
+(Note that the steps in the shell scripts are the ones for MacOS)
 
 ```
 ./python_setup.sh
