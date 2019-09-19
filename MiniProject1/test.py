@@ -8,6 +8,7 @@ import scipy
 import matplotlib
 import pandas as pd
 import matplotlib.pyplot as plt
+import itertools
 
 # main(['list'])
 # main(['show', 'wheel'])
@@ -26,7 +27,10 @@ wineQualityNumpyArray = wineQualityDataFrame.to_numpy()
 breastCancerNumpyArray= np.loadtxt('breast-cancer-wisconsin.data', dtype=object, delimiter=',')
 breastCancerArrayRowAdded = np.insert(breastCancerNumpyArray, [0], ['Sample code number','Clump Thickness', 'Uniformity of Cell Size', 'Uniformity of Cell Shape', 'Marginal Adhesion', 'Single Epithelial Cell Size', 'Bare Nuclei', 'Bland Chromatin', 'Normal Nucleoli', 'Mitoses', 'Class'], axis = 0)
 #print(breastCancerArrayRowAdded.shape) output(700, 11)
+#print(breastCancerArrayRowAdded[24, 6])
 
 #clean data and create binary classification
-
+rowsToDelete = np.where(breastCancerArrayRowAdded == "?")[0]
+breastCancerArrayRowsDeleted = np.delete(breastCancerArrayRowAdded, rowsToDelete, 0)
+#print(result[24, 6])
 
