@@ -32,5 +32,5 @@ breastCancerArrayRowAdded = np.insert(breastCancerNumpyArray, [0], ['Sample code
 #clean data and create binary classification
 rowsToDelete = np.where(breastCancerArrayRowAdded == "?")[0]
 breastCancerArrayRowsDeleted = np.delete(breastCancerArrayRowAdded, rowsToDelete, 0)
-#print(result[24, 6])
+
 
