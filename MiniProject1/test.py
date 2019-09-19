@@ -7,7 +7,7 @@ import math
 import scipy
 import matplotlib
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 # main(['list'])
 # main(['show', 'wheel'])
@@ -23,8 +23,9 @@ breastCancerRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.e
 wineQualityDataFrame= pd.read_csv('winequality-red.csv', sep='\t|;|,|[|]', engine='python', header=None)
 wineQualityNumpyArray = wineQualityDataFrame.to_numpy()
 #print(wineQualityNumpyArray.shape) output (1600, 12)
-breastCancerNumpyArray= np.loadtxt('breast-cancer-wisconsin.data', dtype=str, delimiter=',')
-#print(breastCancerNumpyArray.shape) output(699, 11)
+breastCancerNumpyArray= np.loadtxt('breast-cancer-wisconsin.data', dtype=object, delimiter=',')
+breastCancerArrayRowAdded = np.insert(breastCancerNumpyArray, [0], ['Sample code number','Clump Thickness', 'Uniformity of Cell Size', 'Uniformity of Cell Shape', 'Marginal Adhesion', 'Single Epithelial Cell Size', 'Bare Nuclei', 'Bland Chromatin', 'Normal Nucleoli', 'Mitoses', 'Class'], axis = 0)
+#print(breastCancerArrayRowAdded.shape) output(700, 11)
 
 #clean data and create binary classification
 
