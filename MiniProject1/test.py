@@ -8,7 +8,6 @@ import scipy
 import matplotlib
 import pandas as pd
 import matplotlib.pyplot as plt
-import itertools
 
 # main(['list'])
 # main(['show', 'wheel'])
@@ -21,8 +20,19 @@ wineQualityRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.ed
 breastCancerRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"')
 
 #convert datafile into numpy nd-array
-wineQualityDataFrame= pd.read_csv('winequality-red.csv', sep='\t|;|,|[|]', engine='python', header=None)
-wineQualityNumpyArray = wineQualityDataFrame.to_numpy()
+wineQualityDataFrame= pd.read_csv('winequality-red.csv', sep='\t|;|,|[|]', engine='python', header=None).drop(0).iloc[:, :-1]
+test = wineQualityDataFrame.iloc[:, -1]
+quality= test.apply(pd.to_numeric, errors='coerce').fillna(test)
+print(type(quality))
+winePositiveData = wineQualityDataFrame.loc[int(quality, 10) >= 6]
+wineNegativeData = wineQualityDataFrame.loc[int(quality, 10) < 6]
+
+winePisitiveQualityNumpyArray = winePositiveData.to_numpy()
+wineNegativeQualityNumpyArray = wineNegativeData.to_numpy()
+
+print(winePisitiveQualityNumpyArray.shape)
+print(wineNegativeQualityNumpyArray.shape)
+
 #print(wineQualityNumpyArray.shape) output (1600, 12)
 breastCancerNumpyArray= np.loadtxt('breast-cancer-wisconsin.data', dtype=object, delimiter=',')
 breastCancerArrayRowAdded = np.insert(breastCancerNumpyArray, [0], ['Sample code number','Clump Thickness', 'Uniformity of Cell Size', 'Uniformity of Cell Shape', 'Marginal Adhesion', 'Single Epithelial Cell Size', 'Bare Nuclei', 'Bland Chromatin', 'Normal Nucleoli', 'Mitoses', 'Class'], axis = 0)
@@ -32,5 +42,4 @@ breastCancerArrayRowAdded = np.insert(breastCancerNumpyArray, [0], ['Sample code
 #clean data and create binary classification
 rowsToDelete = np.where(breastCancerArrayRowAdded == "?")[0]
 breastCancerArrayRowsDeleted = np.delete(breastCancerArrayRowAdded, rowsToDelete, 0)
-
 
