@@ -20,18 +20,18 @@ wineQualityRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.ed
 breastCancerRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"')
 
 #convert datafile into numpy nd-array
-wineQualityDataFrame= pd.read_csv('winequality-red.csv', sep='\t|;|,|[|]', engine='python', header=None).drop(0).iloc[:, :-1]
-test = wineQualityDataFrame.iloc[:, -1]
-quality= test.apply(pd.to_numeric, errors='coerce').fillna(test)
-print(type(quality))
-winePositiveData = wineQualityDataFrame.loc[int(quality, 10) >= 6]
-wineNegativeData = wineQualityDataFrame.loc[int(quality, 10) < 6]
+wineQualityDataFrame= pd.read_csv('winequality-red.csv', sep='\t|;|,|[|]', engine='python', header=None).drop(0)
+wineQualityDataFrameDropLastColumn = wineQualityDataFrame.iloc[:, :-1]
+qualitySeries = wineQualityDataFrame.iloc[:, -1]
+quality= pd.to_numeric(qualitySeries, downcast='signed')
+winePositiveData = wineQualityDataFrameDropLastColumn.loc[quality >= 6]
+wineNegativeData = wineQualityDataFrameDropLastColumn.loc[quality < 6]
 
 winePisitiveQualityNumpyArray = winePositiveData.to_numpy()
 wineNegativeQualityNumpyArray = wineNegativeData.to_numpy()
 
-print(winePisitiveQualityNumpyArray.shape)
-print(wineNegativeQualityNumpyArray.shape)
+# print(winePisitiveQualityNumpyArray.shape)(855, 11)
+# print(wineNegativeQualityNumpyArray.shape)(744, 11)
 
 #print(wineQualityNumpyArray.shape) output (1600, 12)
 breastCancerNumpyArray= np.loadtxt('breast-cancer-wisconsin.data', dtype=object, delimiter=',')
