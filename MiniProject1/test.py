@@ -24,9 +24,10 @@ wineQualityDataFrame= pd.read_csv('winequality-red.csv', sep='\t|;|,|[|]', engin
 wineQualityDataFrameDropLastColumn = wineQualityDataFrame.iloc[:, :-1]
 qualitySeries = wineQualityDataFrame.iloc[:, -1]
 quality= pd.to_numeric(qualitySeries, downcast='signed')
+
+#convert into binary task
 winePositiveData = wineQualityDataFrameDropLastColumn.loc[quality >= 6]
 wineNegativeData = wineQualityDataFrameDropLastColumn.loc[quality < 6]
-
 winePisitiveQualityNumpyArray = winePositiveData.to_numpy()
 wineNegativeQualityNumpyArray = wineNegativeData.to_numpy()
 
