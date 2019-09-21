@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 class logisticRegression:
     """logistic regression model class"""
@@ -49,7 +50,7 @@ class logisticRegression:
         print("Number of Iterations to converge: %d" % count)
         return w
       
-    def perdict(self,X):
+    def predict(self,X):
         """ Define a predict function, which takes a set of input points (i.e., X) 
         as input and outputs predictions (i.e., yˆ) for these points. Note that you
          need to convert probabilities to binary 0-1 predictions by thresholding 
@@ -70,24 +71,37 @@ class LDA:
     """LDA model class"""
     
     
-    def __init__(self, N):
+    def __init__(self, N0, N1):
         """ initialize the model parameters as attributues,
         as well as to define other important properties of the model """
         # leanrning rate
-        self.w = np.zeros(N);
+        #self.w = np.zeros(N);
+        self.p0 = N0/(N0+N1) 
+        self.p1 = N1/(N0+N1)
+      
+        
     
     def fit(self,X, y, a):
         """ Define a fit function, which takes the training data (i.e., X and y)
         —as well as other hyperparameters (e.g., the learning rate and/or number
         of gradient descent iterations)—as input. 
         This function should train your model by modifying the model parameters """
+        self.mu0 = np.zeros(X.shape[1])
+        self.mu1 = np.zeros(X.shape[1])
+        self.covariance = np.zeros([X.shape[1], X.shape[1]])
     
-    def perdict(self,X):
+    def predict(self,X):
         """ Define a predict function, which takes a set of input points (i.e., X) 
         as input and outputs predictions (i.e., yˆ) for these points. Note that you
          need to convert probabilities to binary 0-1 predictions by thresholding 
          the output at 0.5! """
         # perdiction results
+        covariance_inverse = np.linalg.inv(self.covariance)
+        subtract_matrix = np.subtract(self.mu1, self.mu0)
+        dot_product = np.dot(np.dot(X.T, covariance_inverse), subtract_matrix)
+        w0 = math.log((self.p1)/(self.p0)) - 1/2(np.dot(np.dot(self.mu1.T, covariance_inverse), self.mu1)) + 1/2(np.dot(np.dot(self.mu0.T, covariance_inverse), self.mu0))
+        log_odds = w0 + dot_product
+        y_head = (log_odds>0)
         return y_head
 
 # help(logisticRegression)
