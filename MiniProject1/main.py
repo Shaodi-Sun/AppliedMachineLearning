@@ -103,4 +103,4 @@ for i in range(n):
     scsCount += 1
 print("Accuracy: %.2f %%" % (100*scsCount/n))
 # Training Time: 0 s
-# Accuracy: 65.01 %
+# Accuracy: 98.54 %
