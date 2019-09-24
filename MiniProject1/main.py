@@ -57,23 +57,25 @@ breastCancerArrayDropLastColumn= np.delete(breastCancerArrayRowsDeleted, np.s_[-
 # print(benignCount) 444
 # print(MaglignantCount) 239
 
-# rowsForBenign = np.where(breastCancerNumpyArray[:, 10] == "2")[0]
-# rowsForMaglignant= np.where(breastCancerNumpyArray[:, 10] == "4")[0]
+rowsForBenign = np.where(breastCancerArrayRowsDeleted[:, 10] == "2")[0]
+rowsForMaglignant= np.where(breastCancerArrayRowsDeleted[:, 10] == "4")[0]
+benignClass = np.array(breastCancerArrayDropLastColumn, dtype=np.float)[rowsForBenign, :]
+maglignantClass =  np.array(breastCancerArrayDropLastColumn, dtype=np.float)[rowsForMaglignant, :]
 
 #logistic regression 
-n = wineFeatures.shape[0]
-ls = logisticRegression(wineFeatures.shape[1])
-start = time.process_time()
-w = ls.fit(wineFeatures,qualityBinary,0.05,0.001)
-end = time.process_time()
-print("Training Time: %.f s" % (end-start))
-perdictedY = np.zeros(n)
-scsCount = 0
-for i in range(n):
-  perdictedY[i] = ls.predict(wineFeatures[i,:])
-  if (qualityBinary[i] == perdictedY[i]):
-    scsCount += 1
-print("Accuracy: %.2f %%" % (100*scsCount/n))
+# n = wineFeatures.shape[0]
+# ls = logisticRegression(wineFeatures.shape[1])
+# start = time.process_time()
+# w = ls.fit(wineFeatures,qualityBinary,0.05,0.001)
+# end = time.process_time()
+# print("Training Time: %.f s" % (end-start))
+# perdictedY = np.zeros(n)
+# scsCount = 0
+# for i in range(n):
+#   perdictedY[i] = ls.predict(wineFeatures[i,:])
+#   if (qualityBinary[i] == perdictedY[i]):
+#     scsCount += 1
+# print("Accuracy: %.2f %%" % (100*scsCount/n))
 # Number of Iterations to converge: 1916
 # Training Time: 32 s
 # Accuracy: 66.54 %
@@ -81,5 +83,9 @@ print("Accuracy: %.2f %%" % (100*scsCount/n))
 #LDA
 lda = LDA(benignCount, MaglignantCount)
 start = time.process_time()
-
+test = lda.fit(breastCancerArrayDropLastColumn, benignClass, maglignantClass, benignCount, MaglignantCount)
+end = time.process_time()
+predict = lda.predict(breastCancerArrayDropLastColumn); 
+print("Training Time: %.f s" % (end-start))
+print("predict is %.f" %predict)
 

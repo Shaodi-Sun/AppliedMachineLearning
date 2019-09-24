@@ -78,19 +78,23 @@ class LDA:
         #self.w = np.zeros(N);
         self.p0 = N0/(N0+N1) 
         self.p1 = N1/(N0+N1)
+        self.mu0 = np.zeros(N0+N1)
+        self.mu1 = np.zeros(N0+N1)
+        self.covariance = np.zeros([N0+N1, N0+N1])
       
         
     
-    def fit(self,X, y, a):
+    def fit(self,X, C1, C2, N0, N1):
         """ Define a fit function, which takes the training data (i.e., X and y)
         —as well as other hyperparameters (e.g., the learning rate and/or number
         of gradient descent iterations)—as input. 
         This function should train your model by modifying the model parameters """
-        self.mu0 = np.zeros(X.shape[1])
-        self.mu1 = np.zeros(X.shape[1])
+        self.mu0 = np.mean(C1, axis = 0)
+        self.mu1 = np.mean(C2, axis = 0)
+        denominator = (N0 + N1)/2
         self.covariance = np.zeros([X.shape[1], X.shape[1]])
     
-    def predict(self,X):
+    def predict(self, X):
         """ Define a predict function, which takes a set of input points (i.e., X) 
         as input and outputs predictions (i.e., yˆ) for these points. Note that you
          need to convert probabilities to binary 0-1 predictions by thresholding 
