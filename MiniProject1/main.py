@@ -83,22 +83,24 @@ while index <= classArray.shape[0]:
 
 def evaluate_acc(X,y,y_head):
     scsCount = 0
+    # print(X[0:3,:])
+    # print(y[0:8])
     for i in range(len(y)):
         if (y[i] == y_head[i]):
             scsCount += 1
-    print("Accuracy: %.2f %%" % (100 * scsCount / n))
-    return 100 * scsCount / n
+    print("Accuracy: %.2f %%" % (100 * scsCount / y.shape[0]))
+    return 100 * scsCount / y.shape[0]
 
 #logistic regression 
 #wine dataset
-n = wineFeatures.shape[0]
+
 lr = logisticRegression(wineFeatures.shape[1])
 start = time.process_time()
 w = lr.fit(wineFeatures,qualityBinary,0.05,1e-3)
 end = time.process_time()
 print("Training Time: %.f s" % (end-start))
-predictedQuality = np.zeros(n)
-for i in range(n):
+predictedQuality = np.zeros(wineFeatures.shape[0])
+for i in range(wineFeatures.shape[0]):
   predictedQuality[i] = lr.predict(wineFeatures[i,:])
 evaluate_acc(wineFeatures,qualityBinary,predictedQuality)
 # With normalization
@@ -107,14 +109,13 @@ evaluate_acc(wineFeatures,qualityBinary,predictedQuality)
 # Accuracy: 74.48 %
 
 #breast cancer dataset
-n = breastCancerData.shape[0]
 ls = logisticRegression(breastCancerData.shape[1])
 start = time.process_time()
 w = ls.fit(breastCancerData,classArray,0.05,1e-3)
 end = time.process_time()
 print("Training Time: %.f s" % (end-start))
-perdictedY = np.zeros(n)
-for i in range(n):
+perdictedY = np.zeros(breastCancerData.shape[0])
+for i in range(breastCancerData.shape[0]):
   perdictedY[i] = ls.predict(breastCancerData[i,:])
 
 evaluate_acc(breastCancerData,classArray,perdictedY)
@@ -162,31 +163,32 @@ def excludeSegment(Xsegments, k):
     '''
     trainingSet = np.empty
     for i, segment in enumerate(Xsegments):
-        # print("size of set of ", i, "is ", segment.shape)
         if (i != k):
             if (np.shape(trainingSet)== ()):
                 trainingSet = segment
             else:
                 trainingSet = np.append(trainingSet, segment, axis=0)
-    # print("size of set for ", k, "is ", trainingSet.shape)
     return trainingSet
 
+# k-fold validation
 k = 5
 
 # partition
-# TODO: create function to partition different sets
+def partition(X,y,k,XSegments,ySegments):
+    for i in range(k):
+        lower = math.ceil(i * X.shape[0] / k)
+        upper = math.ceil((i + 1) * X.shape[0] / k)
+        XSegments.append(X[lower:upper, :])
+        ySegments.append(y[lower:upper])
+
 wineFeaturesKSegments = []
 qualityBinarySegments = []
-for i in range(k):
-    lower = math.ceil(i * wineFeatures.shape[0] / k)
-    upper = math.ceil((i + 1) * wineFeatures.shape[0] / k)
-    print(lower, ' ', upper )
-    print(wineFeatures[lower:upper, :].shape)
-    wineFeaturesKSegments.append(wineFeatures[lower:upper, :])
-    qualityBinarySegments.append(qualityBinary[lower:upper])
+partition(wineFeatures,qualityBinary,k,wineFeaturesKSegments,qualityBinarySegments)
 
 # train on k iterations
+# logistic regression
 LR = [logisticRegression(wineFeatures.shape[1]) for i in range(k)]
+avgacc = 0
 for i, lr in enumerate(LR):
     X = excludeSegment(wineFeaturesKSegments, i)
     y = excludeSegment(qualityBinarySegments, i)
@@ -195,5 +197,8 @@ for i, lr in enumerate(LR):
     for j in range(predictedQuality.shape[0]):
         predictedQuality[j] = lr.predict(wineFeaturesKSegments[i][j, :])
     print(i, 'th k-fold validation')
-    evaluate_acc(wineFeaturesKSegments[i], qualityBinarySegments[i], predictedQuality)
+    avgacc += evaluate_acc(wineFeaturesKSegments[i], qualityBinarySegments[i], predictedQuality)
+avgacc /= k
+print("K-fold validation yields average accuracy of %.2f %%" % avgacc)
+# K-fold validation yields average accuracy of 73.61 %
 

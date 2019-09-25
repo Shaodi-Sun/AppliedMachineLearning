@@ -50,7 +50,8 @@ class logisticRegression:
             count += 1 
             # ak = a/count
             ak = a/ pow(count,1)
-            # print(abs(np.max(deltaW)))
+            # if (count % 100 == 0):
+            #     print(abs(np.max(deltaW)))
         self.w = w
         print("Number of Iterations to converge: %d" % count)
         return w
