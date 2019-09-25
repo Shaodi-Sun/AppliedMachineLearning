@@ -10,7 +10,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 from classification import logisticRegression 
-from classification import LDA 
+from classification import LDA
+
 # main(['list'])
 # main(['show', 'wheel'])
 # print('scipy Version: '+scipy.__version__)
@@ -70,20 +71,26 @@ while index <= classArray.shape[0]:
         classArray[index] = 1
     index = index + 1
 
+
+def evaluate_acc(X,y,y_head):
+    scsCount = 0
+    for i in range(len(y)):
+        if (y[i] == y_head[i]):
+            scsCount += 1
+    print("Accuracy: %.2f %%" % (100 * scsCount / n))
+    return 100 * scsCount / n
+
 #logistic regression 
 n = wineFeatures.shape[0]
-ls = logisticRegression(wineFeatures.shape[1])
+lr = logisticRegression(wineFeatures.shape[1])
 start = time.process_time()
-w = ls.fit(wineFeatures,qualityBinary,0.05,1e-3)
+w = lr.fit(wineFeatures,qualityBinary,0.05,1e-3)
 end = time.process_time()
 print("Training Time: %.f s" % (end-start))
-perdictedY = np.zeros(n)
-scsCount = 0
+predictedQuality = np.zeros(n)
 for i in range(n):
-  perdictedY[i] = ls.predict(wineFeatures[i,:])
-  if (qualityBinary[i] == perdictedY[i]):
-    scsCount += 1
-print("Accuracy: %.2f %%" % (100*scsCount/n))
+  predictedQuality[i] = lr.predict(wineFeatures[i,:])
+evaluate_acc(wineFeatures,qualityBinary,predictedQuality)
 # With normalization
 # Number of Iterations to converge: 225
 # Training Time: 5 s
@@ -97,13 +104,10 @@ test = lda.fit(breastCancerData, benignClass, maglignantClass, benignCount, Magl
 end = time.process_time()
 print("Training Time: %.f s" % (end-start))
 n = breastCancerData.shape[0]
-perdictedY = np.zeros(n)
-scsCount = 0
+predictedClass = np.zeros(n)
 for i in range(n):
-  perdictedY[i] = lda.predict(breastCancerData[i,:])
-  if (classArray[i] == perdictedY[i]):
-    scsCount += 1
-print("Accuracy: %.2f %%" % (100*scsCount/n))
+  predictedClass[i] = lda.predict(breastCancerData[i,:])
+evaluate_acc(breastCancerData,classArray,predictedClass)
 # Training Time: 0 s
 # Accuracy: 98.54 %
 
