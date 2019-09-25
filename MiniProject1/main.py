@@ -111,3 +111,48 @@ evaluate_acc(breastCancerData,classArray,predictedClass)
 # Training Time: 0 s
 # Accuracy: 98.54 %
 
+# kfold validation
+def excludeSegment(Xsegments, k):
+    '''
+    :param Xsegments: a list of segments
+    :param k: indicates the kth segment to exclude from the Xsegments list
+    :return: a numpy ndarray of all the training data except that from the kth segment
+    '''
+    trainingSet = np.empty
+    for i, segment in enumerate(Xsegments):
+        # print("size of set of ", i, "is ", segment.shape)
+        if (i != k):
+            if (np.shape(trainingSet)== ()):
+                trainingSet = segment
+            else:
+                trainingSet = np.append(trainingSet, segment, axis=0)
+    # print("size of set for ", k, "is ", trainingSet.shape)
+    return trainingSet
+
+k = 5
+
+# partition
+# TODO: create function to partition different sets
+wineFeaturesKSegments = []
+qualityBinarySegments = []
+for i in range(k):
+    lower = math.ceil(i * wineFeatures.shape[0] / k)
+    upper = math.ceil((i + 1) * wineFeatures.shape[0] / k)
+    print(lower, ' ', upper )
+    print(wineFeatures[lower:upper, :].shape)
+    wineFeaturesKSegments.append(wineFeatures[lower:upper, :])
+    qualityBinarySegments.append(qualityBinary[lower:upper])
+    # TODO: bug - the dimension of the segments are one row fewer than they are supposed to be (319,11) vs (320,11)
+
+# train on k iterations
+LR = [logisticRegression(wineFeatures.shape[1]) for i in range(k)]
+for i, lr in enumerate(LR):
+    X = excludeSegment(wineFeaturesKSegments, i)
+    y = excludeSegment(qualityBinarySegments, i)
+    lr.fit(X, y, 0.05, 1e-3)
+    predictedQuality = np.zeros(wineFeaturesKSegments[i].shape[0])
+    for j in range(predictedQuality.shape[0]):
+        predictedQuality[j] = lr.predict(wineFeaturesKSegments[i][j, :])
+    print(i, 'th k-fold validation')
+    evaluate_acc(wineFeaturesKSegments[i], qualityBinarySegments[i], predictedQuality)
+
