@@ -31,8 +31,11 @@ quality= pd.to_numeric(qualitySeries, downcast='signed')
 #convert into binary task
 winePositiveData = wineQualityDataFrameDropLastColumn.loc[quality >= 6]
 wineNegativeData = wineQualityDataFrameDropLastColumn.loc[quality < 6]
-winePisitiveQualityNumpyArray = winePositiveData.to_numpy()
-wineNegativeQualityNumpyArray = wineNegativeData.to_numpy()
+winePositiveQualityNumpyArray = np.array(winePositiveData,dtype=np.float)
+wineNegativeQualityNumpyArray = np.array(wineNegativeData,dtype=np.float)
+wineQualityZero = winePositiveQualityNumpyArray.shape[0]
+wineQualityOne = wineNegativeQualityNumpyArray.shape[0]
+
 
 # print(winePisitiveQualityNumpyArray.shape)(855, 11)
 # print(wineNegativeQualityNumpyArray.shape)(744, 11)
@@ -40,6 +43,12 @@ wineNegativeQualityNumpyArray = wineNegativeData.to_numpy()
 qualityBinary = (quality>=6).to_numpy()
 # print(qualityBinary) (1599,)
 wineFeatures = np.array(wineQualityDataFrameDropLastColumn,dtype=np.float)
+qualityArray = np.zeros(wineFeatures.shape[0])
+index = 0 
+while index <= qualityArray.shape[0]: 
+    if (index in wineNegativeQualityNumpyArray):
+        qualityArray[index] = 1
+    index = index + 1
 # print(wineFeatures.shape) (1599, 11)
 
 #print(wineQualityNumpyArray.shape) output (1600, 12)
@@ -81,6 +90,7 @@ def evaluate_acc(X,y,y_head):
     return 100 * scsCount / n
 
 #logistic regression 
+#wine dataset
 n = wineFeatures.shape[0]
 lr = logisticRegression(wineFeatures.shape[1])
 start = time.process_time()
@@ -96,8 +106,40 @@ evaluate_acc(wineFeatures,qualityBinary,predictedQuality)
 # Training Time: 5 s
 # Accuracy: 74.48 %
 
+#breast cancer dataset
+n = breastCancerData.shape[0]
+ls = logisticRegression(breastCancerData.shape[1])
+start = time.process_time()
+w = ls.fit(breastCancerData,classArray,0.05,1e-3)
+end = time.process_time()
+print("Training Time: %.f s" % (end-start))
+perdictedY = np.zeros(n)
+for i in range(n):
+  perdictedY[i] = ls.predict(breastCancerData[i,:])
+
+evaluate_acc(breastCancerData,classArray,perdictedY)
+# Number of Iterations to converge: 168
+# Training Time: 1 s
+# Accuracy: 98.54 %
+
+
 
 #LDA
+#wine dataset
+lda = LDA(wineQualityZero, wineQualityOne)
+start = time.process_time()
+test = lda.fit(wineFeatures, winePositiveQualityNumpyArray, wineNegativeQualityNumpyArray, wineQualityZero, wineQualityOne)
+end = time.process_time()
+print("Training Time: %.f s" % (end-start))
+n = wineFeatures.shape[0]
+perdictedY = np.zeros(n)
+for i in range(n):
+  perdictedY[i] = lda.predict(wineFeatures[i,:])
+evaluate_acc(wineFeatures,qualityArray,perdictedY)
+# Training Time: 0 s
+# Accuracy: 91.12 %
+
+#breast cancer dataset
 lda = LDA(benignCount, MaglignantCount)
 start = time.process_time()
 test = lda.fit(breastCancerData, benignClass, maglignantClass, benignCount, MaglignantCount)
