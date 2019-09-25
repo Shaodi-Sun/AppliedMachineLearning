@@ -184,7 +184,6 @@ for i in range(k):
     print(wineFeatures[lower:upper, :].shape)
     wineFeaturesKSegments.append(wineFeatures[lower:upper, :])
     qualityBinarySegments.append(qualityBinary[lower:upper])
-    # TODO: bug - the dimension of the segments are one row fewer than they are supposed to be (319,11) vs (320,11)
 
 # train on k iterations
 LR = [logisticRegression(wineFeatures.shape[1]) for i in range(k)]
