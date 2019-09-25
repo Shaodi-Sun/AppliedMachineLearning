@@ -35,6 +35,10 @@ class logisticRegression:
         count = 0 
         deltaW = epsilon + 1
 
+        # normalize features
+        for i in range(m):
+            X[:,i] = np.divide(X[:,i] - np.min(X[:,i]),np.max(X[:,i]) - np.min(X[:,i]))
+
         # gradient descent, minimizing the cross-entropy loss
         while (abs(np.max(deltaW))> epsilon):
             w0 = w
@@ -44,8 +48,9 @@ class logisticRegression:
             w = w + ak * der
             deltaW = w - w0
             count += 1 
-            ak = a/count
-#             print(abs(np.max(deltaW)))
+            # ak = a/count
+            ak = a/ pow(count,1)
+            # print(abs(np.max(deltaW)))
         self.w = w
         print("Number of Iterations to converge: %d" % count)
         return w
@@ -55,7 +60,7 @@ class logisticRegression:
         as input and outputs predictions (i.e., yˆ) for these points. Note that you
          need to convert probabilities to binary 0-1 predictions by thresholding 
          the output at 0.5! """
-        # perdiction results
+        # prediction results
         log_odds = np.dot(self.w.T,X)
         y_head = (log_odds>0)
         return y_head
@@ -74,7 +79,6 @@ class LDA:
     def __init__(self, N0, N1):
         """ initialize the model parameters as attributues,
         as well as to define other important properties of the model """
-        # leanrning rate
         #self.w = np.zeros(N);
         self.p0 = N0/(N0+N1) 
         self.p1 = N1/(N0+N1)
@@ -94,7 +98,7 @@ class LDA:
         denominator = (N0 + N1)/2
         variance0 = 0
         variance1 = 0
-        for row in C0: 
+        for row in C0:
             variance0 = variance0 + np.dot((row - self.mu0) , (row - self.mu0).T)
         for row in C1: 
             variance1 = variance1 + np.dot((row - self.mu1) , (row- self.mu1).T) 
@@ -106,7 +110,7 @@ class LDA:
         as input and outputs predictions (i.e., yˆ) for these points. Note that you
          need to convert probabilities to binary 0-1 predictions by thresholding 
          the output at 0.5! """
-        # perdiction results
+        # prediction results
         covariance_inverse = np.reciprocal(self.covariance)
         subtract_matrix = np.subtract(self.mu1, self.mu0)
         dot_product = np.dot((X.T*covariance_inverse), subtract_matrix)

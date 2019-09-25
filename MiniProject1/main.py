@@ -74,7 +74,7 @@ while index <= classArray.shape[0]:
 n = wineFeatures.shape[0]
 ls = logisticRegression(wineFeatures.shape[1])
 start = time.process_time()
-w = ls.fit(wineFeatures,qualityBinary,0.05,0.001)
+w = ls.fit(wineFeatures,qualityBinary,0.05,1e-3)
 end = time.process_time()
 print("Training Time: %.f s" % (end-start))
 perdictedY = np.zeros(n)
@@ -84,9 +84,11 @@ for i in range(n):
   if (qualityBinary[i] == perdictedY[i]):
     scsCount += 1
 print("Accuracy: %.2f %%" % (100*scsCount/n))
-# Number of Iterations to converge: 1916
-# Training Time: 32 s
-# Accuracy: 66.54 %
+# With normalization
+# Number of Iterations to converge: 225
+# Training Time: 5 s
+# Accuracy: 74.48 %
+
 
 #LDA
 lda = LDA(benignCount, MaglignantCount)
@@ -104,3 +106,4 @@ for i in range(n):
 print("Accuracy: %.2f %%" % (100*scsCount/n))
 # Training Time: 0 s
 # Accuracy: 98.54 %
+
