@@ -154,7 +154,7 @@ evaluate_acc(breastCancerData,classArray,predictedClass)
 # Training Time: 0 s
 # Accuracy: 98.54 %
 
-# kfold validation
+# kfold validation for logistic regression
 def excludeSegment(Xsegments, k):
     '''
     :param Xsegments: a list of segments
@@ -201,4 +201,41 @@ for i, lr in enumerate(LR):
 avgacc /= k
 print("K-fold validation yields average accuracy of %.2f %%" % avgacc)
 # K-fold validation yields average accuracy of 73.61 %
+
+# k-fold cross validation for LDA
+breastCancerDataSize = len(breastCancerArrayRowsDeleted)
+foldSize = int(breastCancerDataSize / 5)
+#print(breastCancerDataSize)
+for i in range(k):
+    print('Iteration #', i)
+    
+    breastCancerFoldValidation = np.array(breastCancerArrayDropLastColumn, dtype=np.float)[i * foldSize : (i + 1) * foldSize]
+    breastCancerFoldValidationDeleted = np.array(breastCancerArrayRowsDeleted, dtype=np.float)[i * foldSize : (i + 1) * foldSize]
+    #print(len(breastCancerFoldValidation))
+    breastCancerFoldTraining  = np.concatenate((np.array(breastCancerArrayDropLastColumn, dtype=np.float)[: i * foldSize], np.array(breastCancerArrayDropLastColumn, dtype=np.float)[(i + 1) * foldSize :]), axis = 0, out = None)
+    breastCancerFoldTrainingDeleted  = np.concatenate((np.array(breastCancerArrayRowsDeleted, dtype=np.float)[: i * foldSize], np.array(breastCancerArrayRowsDeleted, dtype=np.float)[(i + 1) * foldSize :]), axis = 0, out = None)
+    #print(len(breastCancerFoldTraining))
+    rowsForBenign = np.where(breastCancerFoldTrainingDeleted[:, 10] == "2")[0]
+    rowsForMaglignant= np.where(breastCancerFoldTrainingDeleted[:, 10] == "4")[0]
+    benignCountKfold = np.count_nonzero(breastCancerFoldTrainingDeleted[:, 10] == "2", axis=0)
+    MaglignantCountKfold = np.count_nonzero(breastCancerFoldTrainingDeleted[:, 10] == "4", axis=0)
+    benignClassKfold = np.array(breastCancerFoldTraining, dtype=np.float)[rowsForBenign, :]
+    maglignantClassKfold =  np.array(breastCancerFoldTraining, dtype=np.float)[rowsForMaglignant, :]
+    classArrayKfold = np.zeros(breastCancerFoldValidationDeleted.shape[0])
+    index = 0 
+    while index <= classArrayKfold.shape[0]: 
+        if (index in maglignantClassKfold):
+            classArrayKfold[index] = 1
+        index = index + 1
+    # Run LDA
+    ldaKfold = LDA(benignCountKfold, MaglignantCountKfold)
+    startKfold = time.process_time()
+    testKfold = ldaKfold.fit(breastCancerFoldTraining, benignClassKfold, maglignantClassKfold, benignCountKfold, MaglignantCountKfold)
+    endKfold = time.process_time()
+    print("Training Time: %.f s" % (endKfold-startKfold))
+    n = breastCancerFoldValidation.shape[0]
+    predictedClassKfold = np.zeros(n)
+    for i in range(n):
+        predictedClassKfold[i] = ldaKfold.predict(breastCancerFoldValidation[i,:])
+    evaluate_acc(breastCancerFoldValidation,classArrayKfold,predictedClassKfold)
 
