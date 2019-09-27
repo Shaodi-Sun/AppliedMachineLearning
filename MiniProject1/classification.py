@@ -35,7 +35,7 @@ class logisticRegression:
         count = 0 
         deltaW = epsilon + 1
 
-        # normalize features
+        # normalize features TODO: make a copy of the data instead of operating directly on it
         for i in range(m):
             X[:,i] = np.divide(X[:,i] - np.min(X[:,i]),np.max(X[:,i]) - np.min(X[:,i]))
 
@@ -72,6 +72,7 @@ class logisticRegression:
         # print(Xi)
         a = np.dot(w.T,Xi)
         return 1/(1+np.exp(-a))
+    # TODO: look at mycourses discussion board -> put this in a more numerically stable way
 
 class LDA:
     """LDA model class"""
