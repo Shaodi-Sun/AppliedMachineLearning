@@ -210,13 +210,13 @@ foldSize = int(breastCancerDataSize / 5)
 for i in range(k):
     print('Iteration #', i)
     
-    breastCancerFoldValidation = breastCancerArrayDropLastColumn[i * foldSize : (i + 1) * foldSize]
-    breastCancerFoldValidationDeleted = breastCancerArrayRowsDeleted[i * foldSize : (i + 1) * foldSize]
+    breastCancerFoldValidation = breastCancerArrayDropLastColumn[(i * foldSize) : ((i + 1) * foldSize)]
+    breastCancerFoldValidationDeleted = breastCancerArrayRowsDeleted[(i * foldSize) : ((i + 1) * foldSize)]
     breastCancerDataFold = np.array(breastCancerFoldValidation, dtype=np.float)
     #print(breastCancerFoldValidation)
     #print(len(breastCancerFoldValidation))
-    breastCancerFoldTraining  = np.concatenate((np.array(breastCancerArrayDropLastColumn, dtype=np.float)[: i * foldSize], np.array(breastCancerArrayDropLastColumn, dtype=np.float)[(i + 1) * foldSize :]), axis = 0)
-    breastCancerFoldTrainingDeleted  = np.concatenate((np.array(breastCancerArrayRowsDeleted, dtype=np.float)[: i * foldSize], np.array(breastCancerArrayRowsDeleted, dtype=np.float)[(i + 1) * foldSize :]), axis = 0)
+    breastCancerFoldTraining  = np.concatenate((np.array(breastCancerArrayDropLastColumn, dtype=np.float)[: (i * foldSize)], np.array(breastCancerArrayDropLastColumn, dtype=np.float)[((i + 1) * foldSize) :]), axis = 0)
+    breastCancerFoldTrainingDeleted  = np.concatenate((np.array(breastCancerArrayRowsDeleted, dtype=np.float)[: (i * foldSize)], np.array(breastCancerArrayRowsDeleted, dtype=np.float)[((i + 1) * foldSize) :]), axis = 0)
     #breastCancerFoldTraining = tuple(breastCancerFoldTraining)
     #breastCancerFoldTrainingDeleted = tuple(breastCancerFoldTrainingDeleted)
     #print(breastCancerFoldTraining)
@@ -226,13 +226,18 @@ for i in range(k):
     MaglignantCountKfold = np.count_nonzero(breastCancerFoldTrainingDeleted[:, 10] == 4, axis=0)
     benignClassKfold = np.array(breastCancerFoldTraining, dtype=np.float)[rowsForBenignKfold, :]
     maglignantClassKfold =  np.array(breastCancerFoldTraining, dtype=np.float)[rowsForMaglignantKfold, :]
+    # validation set for evaluation
+    rowsForMaglignantValidation = np.where(breastCancerFoldValidationDeleted[:, 10] == 4)[0]
+    maglignantClassValidation = np.array(breastCancerFoldValidation, dtype=np.float)[rowsForMaglignantValidation, :]
     classArrayKfold = np.zeros(breastCancerFoldValidationDeleted.shape[0])
-    #print('aaaaaaaaaaaaaa',rowsForBenignKfold)
+    #print('aaaaaaaaaaaaaa', breastCancerFoldValidationDeleted)
+    #print('aaaaaaaaaaaaaa', rowsForMaglignantValidation)
     index = 0 
     while index <= classArrayKfold.shape[0]: 
-        if (index in maglignantClassKfold):
+        if (index in maglignantClassValidation):
             classArrayKfold[index] = 1
         index = index + 1
+    #print(classArrayKfold)
     # Run LDA
     ldaKfold = LDA(benignCountKfold, MaglignantCountKfold)
     startKfold = time.process_time()
@@ -241,7 +246,7 @@ for i in range(k):
     print("Training Time: %.f s" % (endKfold-startKfold))
     n = breastCancerDataFold.shape[0]
     predictedClassKfold = np.zeros(n)
-    for i in range(n):
-        predictedClassKfold[i] = ldaKfold.predict(breastCancerDataFold[i,:])
+    for j in range(n):
+        predictedClassKfold[j] = ldaKfold.predict(breastCancerDataFold[j,:])
     evaluate_acc(breastCancerDataFold,classArrayKfold,predictedClassKfold)
 
