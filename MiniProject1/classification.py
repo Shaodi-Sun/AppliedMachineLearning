@@ -128,9 +128,3 @@ class LDA:
 
 # help(logisticRegression)
 # help(LDA)
-def evaluate_acc(trueV, predictV, n):
-    scsCount = 0
-    for i in range(n):
-        if (trueV[i] == predictV[i]):
-            scsCount += 1
-    return (100*scsCount/n)

@@ -1,7 +1,7 @@
 import pip
 from pip._internal import main
 import os
-os.system('/bin/bash -c "sudo pip install numpy matplotlib scipy pandas"')
+#os.system('/bin/bash -c "sudo pip install numpy matplotlib scipy pandas"')
 import numpy as np
 import math
 import scipy
@@ -19,8 +19,8 @@ from classification import LDA
 # print (np.cbrt(27))
 
 #download data file
-wineQualityRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"')
-breastCancerRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"')
+#wineQualityRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"')
+#breastCancerRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"')
 
 #convert datafile into numpy nd-array
 wineQualityDataFrame= pd.read_csv('winequality-red.csv', sep='\t|;|,|[|]', engine='python', header=None).drop(0)
@@ -68,6 +68,7 @@ breastCancerArrayDropLastColumn= np.delete(breastCancerArrayRowsDeleted, np.s_[-
 # print(MaglignantCount) 239
 
 rowsForBenign = np.where(breastCancerArrayRowsDeleted[:, 10] == "2")[0]
+#print('aaaaaaa', rowsForBenign, 'aaaaaaaaa', breastCancerArrayRowsDeleted)
 rowsForMaglignant= np.where(breastCancerArrayRowsDeleted[:, 10] == "4")[0]
 breastCancerData = np.array(breastCancerArrayDropLastColumn, dtype=np.float)
 benignClass = np.array(breastCancerArrayDropLastColumn, dtype=np.float)[rowsForBenign, :]
@@ -154,7 +155,7 @@ evaluate_acc(breastCancerData,classArray,predictedClass)
 # Training Time: 0 s
 # Accuracy: 98.54 %
 
-# kfold validation
+# kfold validation for logistic regression
 def excludeSegment(Xsegments, k):
     '''
     :param Xsegments: a list of segments
@@ -201,4 +202,46 @@ for i, lr in enumerate(LR):
 avgacc /= k
 print("K-fold validation yields average accuracy of %.2f %%" % avgacc)
 # K-fold validation yields average accuracy of 73.61 %
+
+# k-fold cross validation for LDA
+breastCancerDataSize = len(breastCancerArrayRowsDeleted)
+foldSize = int(breastCancerDataSize / 5)
+#print(breastCancerDataSize)
+for i in range(k):
+    print('Iteration #', i)
+    
+    breastCancerFoldValidation = breastCancerArrayDropLastColumn[i * foldSize : (i + 1) * foldSize]
+    breastCancerFoldValidationDeleted = breastCancerArrayRowsDeleted[i * foldSize : (i + 1) * foldSize]
+    breastCancerDataFold = np.array(breastCancerFoldValidation, dtype=np.float)
+    #print(breastCancerFoldValidation)
+    #print(len(breastCancerFoldValidation))
+    breastCancerFoldTraining  = np.concatenate((np.array(breastCancerArrayDropLastColumn, dtype=np.float)[: i * foldSize], np.array(breastCancerArrayDropLastColumn, dtype=np.float)[(i + 1) * foldSize :]), axis = 0)
+    breastCancerFoldTrainingDeleted  = np.concatenate((np.array(breastCancerArrayRowsDeleted, dtype=np.float)[: i * foldSize], np.array(breastCancerArrayRowsDeleted, dtype=np.float)[(i + 1) * foldSize :]), axis = 0)
+    #breastCancerFoldTraining = tuple(breastCancerFoldTraining)
+    #breastCancerFoldTrainingDeleted = tuple(breastCancerFoldTrainingDeleted)
+    #print(breastCancerFoldTraining)
+    rowsForBenignKfold = np.where(breastCancerFoldTrainingDeleted[:, 10] == 2)[0]
+    rowsForMaglignantKfold= np.where(breastCancerFoldTrainingDeleted[:, 10] == 4)[0]
+    benignCountKfold = np.count_nonzero(breastCancerFoldTrainingDeleted[:, 10] == 2, axis=0)
+    MaglignantCountKfold = np.count_nonzero(breastCancerFoldTrainingDeleted[:, 10] == 4, axis=0)
+    benignClassKfold = np.array(breastCancerFoldTraining, dtype=np.float)[rowsForBenignKfold, :]
+    maglignantClassKfold =  np.array(breastCancerFoldTraining, dtype=np.float)[rowsForMaglignantKfold, :]
+    classArrayKfold = np.zeros(breastCancerFoldValidationDeleted.shape[0])
+    #print('aaaaaaaaaaaaaa',rowsForBenignKfold)
+    index = 0 
+    while index <= classArrayKfold.shape[0]: 
+        if (index in maglignantClassKfold):
+            classArrayKfold[index] = 1
+        index = index + 1
+    # Run LDA
+    ldaKfold = LDA(benignCountKfold, MaglignantCountKfold)
+    startKfold = time.process_time()
+    testKfold = ldaKfold.fit(breastCancerFoldTraining, benignClassKfold, maglignantClassKfold, benignCountKfold, MaglignantCountKfold)
+    endKfold = time.process_time()
+    print("Training Time: %.f s" % (endKfold-startKfold))
+    n = breastCancerDataFold.shape[0]
+    predictedClassKfold = np.zeros(n)
+    for i in range(n):
+        predictedClassKfold[i] = ldaKfold.predict(breastCancerDataFold[i,:])
+    evaluate_acc(breastCancerDataFold,classArrayKfold,predictedClassKfold)
 
