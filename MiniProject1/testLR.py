@@ -64,10 +64,10 @@ breastCancerArrayRowsDeleted = np.delete(breastCancerNumpyArray, rowsToDelete, 0
 
 # counting benign/malignant classes
 benignCount = np.count_nonzero(breastCancerArrayRowsDeleted[:, 10] == "2", axis=0)
-MaglignantCount = np.count_nonzero(breastCancerArrayRowsDeleted[:, 10] == "4", axis=0)
+MalignantCount = np.count_nonzero(breastCancerArrayRowsDeleted[:, 10] == "4", axis=0)
 rowsForBenign = np.where(breastCancerArrayRowsDeleted[:, 10] == "2")[0]
 #print('aaaaaaa', rowsForBenign, 'aaaaaaaaa', breastCancerArrayRowsDeleted)
-rowsForMaglignant= np.where(breastCancerArrayRowsDeleted[:, 10] == "4")[0]
+rowsForMalignant= np.where(breastCancerArrayRowsDeleted[:, 10] == "4")[0]
 # print(benignCount) 444
 # print(MaglignantCount) 239
 
@@ -75,15 +75,10 @@ breastCancerData = np.array(breastCancerArrayRowsDeleted, dtype=np.float)
 breastCancerArrayDropLastColumn = np.delete(breastCancerArrayRowsDeleted, np.s_[-1:], axis=1)
 breastCancerFeature = np.array(breastCancerArrayDropLastColumn, dtype=np.float)
 benignClass = breastCancerFeature[rowsForBenign, :]
-maglignantClass = breastCancerFeature[rowsForMaglignant, :]
+malignantClass = breastCancerFeature[rowsForMalignant, :]
 
 classArray = np.zeros(breastCancerArrayRowsDeleted.shape[0])
-index = 0
-while index <= classArray.shape[0]:
-    if (index in maglignantClass):
-        classArray[index] = 1
-    index = index + 1
-
+classArray[rowsForMalignant] = 1
 
 def evaluate_acc(X,y,y_head):
     scsCount = 0
@@ -127,7 +122,7 @@ def normalize(X):
         X_clone[:,i] = np.divide(X_clone[:,i] - np.min(X_clone[:,i]),np.max(X_clone[:,i]) - np.min(X_clone[:,i]))
     return X_clone
 
-def kfoldLR(X,y,k,a = 0.1, epsilon = 1e-3, power = 1):
+def kfoldLR(X,y,k,a = 0.08, epsilon = 1e-3, power = 1):
     '''
     run kfoldLR(X,y,1) for training on all data and kfold(X,y,k)
     for k fold validation
@@ -181,8 +176,9 @@ def kfoldLR(X,y,k,a = 0.1, epsilon = 1e-3, power = 1):
         # K-fold validation yields average accuracy of 73.61 %
         return np.array([avgacc,avgtt])
 
-
-# # kfoldLR(wineFeatures,qualityBinary,1)
+'''
+# test initial learning rate
+# kfoldLR(wineFeatures,qualityBinary,1)
 learningRate = np.arange(0.01,0.3,0.01)
 resultWine2 = np.zeros((learningRate.shape[0],2))
 for i, a in enumerate(learningRate):
@@ -191,12 +187,37 @@ outfile = TemporaryFile()
 np.save(outfile, resultWine2)
 np.save('resultWine',resultWine2)
 
-# kfoldLR(breastCancerFeature,classArray,1)
+# # kfoldLR(breastCancerFeature,classArray,1)
 resultBC2 = np.zeros((learningRate.shape[0],2))
 for i, a in enumerate(learningRate):
     resultBC2[i,:] = kfoldLR(breastCancerFeature,classArray,5, a, 1e-3)
 outfile = TemporaryFile()
 np.save(outfile, resultBC2)
-np.save('resultBC',resultBC2)
+np.save('resultBC2',resultBC2)
 
 
+# test decay rate
+power = np.arange(1,4,0.5)
+resultWinePower = np.zeros((power.shape[0],2))
+for i, p in enumerate(power):
+    resultWinePower[i,:] = kfoldLR(wineFeatures,qualityBinary,5,0.1,1e-3,p)
+np.save('resultWinePower',resultWinePower)
+
+resultBCPower = np.zeros((power.shape[0],2))
+for i, p in enumerate(power):
+    resultBCPower[i,:] = kfoldLR(breastCancerFeature,classArray,5,0.1,1e-3,p)
+np.save('resultBCPower',resultBCPower)
+
+print(classArray)
+'''
+
+# test feature
+resultWineFeatures = np.zeros((wineFeatures.shape[1],2))
+for colToDelete in range(wineFeatures.shape[1]):
+    wineFeatures_ = np.delete(wineFeatures, colToDelete, axis = 1)
+#     print(wineFeatures.shape)
+#     print(wineFeatures_.shape)
+    resultWineFeatures = kfoldLR(wineFeatures_,qualityBinary,5, 0.08, 1e-3)
+np.save('resultWineFeatures',resultWineFeatures)
+
+# kfoldLR(breastCancerFeature,classArray,5,0.08,1e-3)
