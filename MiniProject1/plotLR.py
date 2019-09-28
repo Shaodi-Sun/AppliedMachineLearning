@@ -12,7 +12,7 @@ import time
 from classification import logisticRegression
 from classification import LDA
 from tempfile import TemporaryFile
-
+'''
 learningRate = np.arange(0.01,0.3,0.01)
 result = np.load('resultWine2.npy')
 
@@ -21,13 +21,13 @@ ax1.set_title("Training Time, Accuracy vs. Initial Learning Rate")
 color = 'tab:red'
 ax1.set_xlabel('Initial Learning Rate')
 ax1.set_ylabel('Training Time (s)', color=color)
-accline, = ax1.plot(learningRate,result[:,1], color = color)
+ttline, = ax1.plot(learningRate,result[:,1], color = color)
 ax1.tick_params(axis='y', labelcolor=color)
 
 ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 color = 'tab:blue'
 ax2.set_ylabel('Accuracy(%)', color=color)  # we already handled the x-label with ax1
-ttline, = ax2.plot(learningRate,result[:,0],color = color)
+accline, = ax2.plot(learningRate,result[:,0],color = color)
 ax2.tick_params(axis='y', labelcolor=color)
 
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
@@ -64,13 +64,13 @@ ax1.set_title("Training Time, Accuracy vs. Learning Rate Decay Speed")
 color = 'tab:red'
 ax1.set_xlabel('Learning Rate Decay Speed')
 ax1.set_ylabel('Training Time (s)', color=color)
-accline, = ax1.plot(power,result[:,1], color = color)
+ttline, = ax1.plot(power,result[:,1], color = color)
 ax1.tick_params(axis='y', labelcolor=color)
 
 ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 color = 'tab:blue'
 ax2.set_ylabel('Accuracy(%)', color=color)  # we already handled the x-label with ax1
-ttline, = ax2.plot(power,result[:,0],color = color)
+accline, = ax2.plot(power,result[:,0],color = color)
 ax2.tick_params(axis='y', labelcolor=color)
 
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
@@ -96,4 +96,27 @@ ax2.tick_params(axis='y', labelcolor=color)
 
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
 lg = ax1.legend([ttline,accline],['Training Time(s)','Accuracy(%)'],loc='lower center')
+plt.show()
+
+
+'''
+colToDelete = np.arang(1,12,1)
+result = np.load('resultWineFeatures.npy')
+
+fig,ax1 = plt.subplots()
+ax1.set_title("Training Time, Accuracy vs. Initial Learning Rate")
+color = 'tab:red'
+ax1.set_xlabel('Feature')
+ax1.set_ylabel('Training Time (s)', color=color)
+ttline, = ax1.plot(colToDelete,result[:,1], color = color)
+ax1.tick_params(axis='y', labelcolor=color)
+
+ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+color = 'tab:blue'
+ax2.set_ylabel('Accuracy(%)', color=color)  # we already handled the x-label with ax1
+accline, = ax2.plot(colToDelete,result[:,0],color = color)
+ax2.tick_params(axis='y', labelcolor=color)
+
+fig.tight_layout()  # otherwise the right y-label is slightly clipped
+# lg = ax1.legend([ttline,accline],['Training Time(s)','Accuracy(%)'],loc='lower center')
 plt.show()

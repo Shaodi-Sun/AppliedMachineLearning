@@ -211,5 +211,13 @@ np.save('resultBCPower',resultBCPower)
 print(classArray)
 '''
 
-kfoldLR(wineFeatures,qualityBinary,5, 0.08, 1e-3)
-kfoldLR(breastCancerFeature,classArray,5,0.08,1e-3)
+# test feature
+resultWineFeatures = np.zeros((wineFeatures.shape[1],2))
+for colToDelete in range(wineFeatures.shape[1]):
+    wineFeatures_ = np.delete(wineFeatures, colToDelete, axis = 1)
+#     print(wineFeatures.shape)
+#     print(wineFeatures_.shape)
+    resultWineFeatures = kfoldLR(wineFeatures_,qualityBinary,5, 0.08, 1e-3)
+np.save('resultWineFeatures',resultWineFeatures)
+
+# kfoldLR(breastCancerFeature,classArray,5,0.08,1e-3)
