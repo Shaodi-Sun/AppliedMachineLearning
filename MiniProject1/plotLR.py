@@ -13,7 +13,7 @@ from classification import logisticRegression
 from classification import LDA
 from tempfile import TemporaryFile
 
-learningRate = np.arange(0.01,0.5,0.1)
+learningRate = np.arange(0.01,0.3,0.01)
 result = np.load('resultWine.npy')
 
 fig,ax1 = plt.subplots()

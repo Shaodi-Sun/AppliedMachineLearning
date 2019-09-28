@@ -127,7 +127,11 @@ def normalize(X):
         X_clone[:,i] = np.divide(X_clone[:,i] - np.min(X_clone[:,i]),np.max(X_clone[:,i]) - np.min(X_clone[:,i]))
     return X_clone
 
-def kfoldLR(X,y,k,a = 0.05, epsilon = 1e-3, power = 1):
+def kfoldLR(X,y,k,a = 0.1, epsilon = 1e-3, power = 1):
+    '''
+    run kfoldLR(X,y,1) for training on all data and kfold(X,y,k)
+    for k fold validation
+    '''
     X_normalized = normalize(X)
     if (k == 1):
         lr = logisticRegression(X_normalized.shape[1])
@@ -179,20 +183,20 @@ def kfoldLR(X,y,k,a = 0.05, epsilon = 1e-3, power = 1):
 
 
 # # kfoldLR(wineFeatures,qualityBinary,1)
-learningRate = np.arange(0.01,0.5,0.1)
-# resultWine = np.zeros((learningRate.shape[0],2))
-# for i, a in enumerate(learningRate):
-#     resultWine[i,:] = kfoldLR(wineFeatures,qualityBinary,5, a, 1e-3)
-# outfile = TemporaryFile()
-# np.save(outfile, resultWine)
-# np.save('resultWine',resultWine)
+learningRate = np.arange(0.01,0.3,0.01)
+resultWine2 = np.zeros((learningRate.shape[0],2))
+for i, a in enumerate(learningRate):
+    resultWine2[i,:] = kfoldLR(wineFeatures,qualityBinary,5, a, 1e-3)
+outfile = TemporaryFile()
+np.save(outfile, resultWine2)
+np.save('resultWine',resultWine2)
 
 # kfoldLR(breastCancerFeature,classArray,1)
-resultBC = np.zeros((learningRate.shape[0],2))
+resultBC2 = np.zeros((learningRate.shape[0],2))
 for i, a in enumerate(learningRate):
-    resultBC[i,:] = kfoldLR(breastCancerFeature,classArray,5, a, 1e-3)
+    resultBC2[i,:] = kfoldLR(breastCancerFeature,classArray,5, a, 1e-3)
 outfile = TemporaryFile()
-np.save(outfile, resultBC)
-np.save('resultBC',resultBC)
+np.save(outfile, resultBC2)
+np.save('resultBC',resultBC2)
 
 
