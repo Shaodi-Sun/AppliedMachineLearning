@@ -94,38 +94,6 @@ def evaluate_acc(X,y,y_head):
     print("Accuracy: %.2f %%" % (100 * scsCount / y.shape[0]))
     return 100 * scsCount / y.shape[0]
 
-#logistic regression 
-#wine dataset
-
-lr = logisticRegression(wineFeatures.shape[1])
-start = time.process_time()
-w = lr.fit(wineFeatures,qualityBinary,0.05,1e-3)
-end = time.process_time()
-print("Training Time: %.f s" % (end-start))
-predictedQuality = np.zeros(wineFeatures.shape[0])
-for i in range(wineFeatures.shape[0]):
-  predictedQuality[i] = lr.predict(wineFeatures[i,:])
-evaluate_acc(wineFeatures,qualityBinary,predictedQuality)
-# With normalization
-# Number of Iterations to converge: 225
-# Training Time: 5 s
-# Accuracy: 74.48 %
-
-#breast cancer dataset
-ls = logisticRegression(breastCancerFeature.shape[1])
-start = time.process_time()
-w = ls.fit(breastCancerFeature, classArray, 0.05, 1e-3)
-end = time.process_time()
-print("Training Time: %.f s" % (end-start))
-perdictedY = np.zeros(breastCancerFeature.shape[0])
-for i in range(breastCancerFeature.shape[0]):
-  perdictedY[i] = ls.predict(breastCancerFeature[i, :])
-
-evaluate_acc(breastCancerFeature, classArray, perdictedY)
-# Number of Iterations to converge: 168
-# Training Time: 1 s
-# Accuracy: 98.54 %
-
 
 
 #LDA
@@ -156,54 +124,6 @@ for i in range(n):
 evaluate_acc(breastCancerFeature, classArray, predictedClass)
 # Training Time: 0 s
 # Accuracy: 98.54 %
-
-# kfold validation for logistic regression
-def excludeSegment(Xsegments, k):
-    '''
-    :param Xsegments: a list of segments
-    :param k: indicates the kth segment to exclude from the Xsegments list
-    :return: a numpy ndarray of all the training data except that from the kth segment
-    '''
-    trainingSet = np.empty
-    for i, segment in enumerate(Xsegments):
-        if (i != k):
-            if (np.shape(trainingSet)== ()):
-                trainingSet = segment
-            else:
-                trainingSet = np.append(trainingSet, segment, axis=0)
-    return trainingSet
-
-# k-fold validation
-k = 5
-
-# partition
-def partition(X,y,k,XSegments,ySegments):
-    for i in range(k):
-        lower = math.ceil(i * X.shape[0] / k)
-        upper = math.ceil((i + 1) * X.shape[0] / k)
-        XSegments.append(X[lower:upper, :])
-        ySegments.append(y[lower:upper])
-
-wineFeaturesKSegments = []
-qualityBinarySegments = []
-partition(wineFeatures,qualityBinary,k,wineFeaturesKSegments,qualityBinarySegments)
-
-# train on k iterations
-# logistic regression
-LR = [logisticRegression(wineFeatures.shape[1]) for i in range(k)]
-avgacc = 0
-for i, lr in enumerate(LR):
-    X = excludeSegment(wineFeaturesKSegments, i)
-    y = excludeSegment(qualityBinarySegments, i)
-    lr.fit(X, y, 0.05, 1e-3)
-    predictedQuality = np.zeros(wineFeaturesKSegments[i].shape[0])
-    for j in range(predictedQuality.shape[0]):
-        predictedQuality[j] = lr.predict(wineFeaturesKSegments[i][j, :])
-    print(i, 'th k-fold validation')
-    avgacc += evaluate_acc(wineFeaturesKSegments[i], qualityBinarySegments[i], predictedQuality)
-avgacc /= k
-print("K-fold validation yields average accuracy of %.2f %%" % avgacc)
-# K-fold validation yields average accuracy of 73.61 %
 
 # k-fold cross validation for LDA
 breastCancerDataSize = len(breastCancerArrayRowsDeleted)

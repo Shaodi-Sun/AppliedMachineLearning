@@ -13,7 +13,7 @@ class logisticRegression:
         # m: num of features
         self.w = np.random.rand(m)
 
-    def fit(self,X, y, a, epsilon):
+    def fit(self, X, y, a, epsilon,p = 1):
         """ Define a fit function, which takes the training data (i.e., X and y)
         —as well as other hyperparameters (e.g., the learning rate and/or number 
         of gradient descent iterations) —as input. 
@@ -21,7 +21,6 @@ class logisticRegression:
   
         # X is the n x m matrix of input data, 
         # y is the n x 1 vector of output data,
-      
         # n: num of training examples 
         n = X.shape[0]
         # m: num of features
@@ -35,10 +34,6 @@ class logisticRegression:
         count = 0 
         deltaW = epsilon + 1
 
-        # normalize features TODO: make a copy of the data instead of operating directly on it
-        for i in range(m):
-            X[:,i] = np.divide(X[:,i] - np.min(X[:,i]),np.max(X[:,i]) - np.min(X[:,i]))
-
         # gradient descent, minimizing the cross-entropy loss
         while (abs(np.max(deltaW))> epsilon):
             w0 = w
@@ -48,13 +43,14 @@ class logisticRegression:
             w = w + ak * der
             deltaW = w - w0
             count += 1 
-            # ak = a/count
-            ak = a/ pow(count,1)
+            # ak = a
+            ak = a/ pow(count,p)
             # if (count % 100 == 0):
             #     print(abs(np.max(deltaW)))
+            # if (count > 3000):
+            #     return np.inf
         self.w = w
-        print("Number of Iterations to converge: %d" % count)
-        return w
+        return count
       
     def predict(self,X):
         """ Define a predict function, which takes a set of input points (i.e., X) 
@@ -72,7 +68,6 @@ class logisticRegression:
         # print(Xi)
         a = np.dot(w.T,Xi)
         return 1/(1+np.exp(-a))
-    # TODO: look at mycourses discussion board -> put this in a more numerically stable way
 
 class LDA:
     """LDA model class"""
