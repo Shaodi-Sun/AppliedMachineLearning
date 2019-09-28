@@ -1,7 +1,7 @@
 import pip
 from pip._internal import main
 import os
-#os.system('/bin/bash -c "sudo pip install numpy matplotlib scipy pandas"')
+os.system('/bin/bash -c "sudo pip install numpy matplotlib scipy pandas"')
 import numpy as np
 import math
 import scipy
@@ -19,18 +19,18 @@ from classification import LDA
 # print (np.cbrt(27))
 
 #download data file
-#wineQualityRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"')
-#breastCancerRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"')
+wineQualityRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"')
+breastCancerRawData = os.system('/bin/bash -c "curl -O https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"')
 
 #convert datafile into numpy nd-array
 wineQualityDataFrame= pd.read_csv('winequality-red.csv', sep='\t|;|,|[|]', engine='python', header=None).drop(0)
-wineQualityDataFrameDropLastColumn = wineQualityDataFrame.iloc[:, :-1]
+wineQualityDataFrameFeature = wineQualityDataFrame.iloc[:, :-1]
 qualitySeries = wineQualityDataFrame.iloc[:, -1]
 quality= pd.to_numeric(qualitySeries, downcast='signed')
 
 #convert into binary task
-winePositiveData = wineQualityDataFrameDropLastColumn.loc[quality >= 6]
-wineNegativeData = wineQualityDataFrameDropLastColumn.loc[quality < 6]
+winePositiveData = wineQualityDataFrameFeature.loc[quality >= 6]
+wineNegativeData = wineQualityDataFrameFeature.loc[quality < 6]
 winePositiveQualityNumpyArray = np.array(winePositiveData,dtype=np.float)
 wineNegativeQualityNumpyArray = np.array(wineNegativeData,dtype=np.float)
 wineQualityZero = winePositiveQualityNumpyArray.shape[0]
@@ -42,7 +42,7 @@ wineQualityOne = wineNegativeQualityNumpyArray.shape[0]
 
 qualityBinary = (quality>=6).to_numpy()
 # print(qualityBinary) (1599,)
-wineFeatures = np.array(wineQualityDataFrameDropLastColumn,dtype=np.float)
+wineFeatures = np.array(wineQualityDataFrameFeature,dtype=np.float)
 qualityArray = np.zeros(wineFeatures.shape[0])
 index = 0 
 while index <= qualityArray.shape[0]: 
@@ -59,24 +59,24 @@ breastCancerNumpyArray= np.loadtxt('breast-cancer-wisconsin.data', dtype=object,
 
 #clean data and create binary classification
 rowsToDelete = np.where(breastCancerNumpyArray == "?")[0]
-breastCancerArrayRowsDeleted = np.delete(breastCancerNumpyArray, rowsToDelete, 0)
+breastCancerArrayCleaned = np.delete(breastCancerNumpyArray, rowsToDelete, 0)
 
 # counting benign/malignant classes
-benignCount = np.count_nonzero(breastCancerArrayRowsDeleted[:, 10] == "2", axis=0)
-MalignantCount = np.count_nonzero(breastCancerArrayRowsDeleted[:, 10] == "4", axis=0)
-rowsForBenign = np.where(breastCancerArrayRowsDeleted[:, 10] == "2")[0]
-#print('aaaaaaa', rowsForBenign, 'aaaaaaaaa', breastCancerArrayRowsDeleted)
-rowsForMalignant= np.where(breastCancerArrayRowsDeleted[:, 10] == "4")[0]
+benignCount = np.count_nonzero(breastCancerArrayCleaned[:, 10] == "2", axis=0)
+MalignantCount = np.count_nonzero(breastCancerArrayCleaned[:, 10] == "4", axis=0)
+rowsForBenign = np.where(breastCancerArrayCleaned[:, 10] == "2")[0]
+#print('aaaaaaa', rowsForBenign, 'aaaaaaaaa', breastCancerArrayCleaned)
+rowsForMalignant= np.where(breastCancerArrayCleaned[:, 10] == "4")[0]
 # print(benignCount) 444
 # print(MalignantCount) 239
 
-breastCancerData = np.array(breastCancerArrayRowsDeleted, dtype=np.float)
-breastCancerArrayDropLastColumn = np.delete(breastCancerArrayRowsDeleted, np.s_[-1:], axis=1)
-breastCancerFeature = np.delete(np.array(breastCancerArrayDropLastColumn, dtype=np.float), 0, axis = 1)
+breastCancerData = np.array(breastCancerArrayCleaned, dtype=np.float)
+breastCancerArrayFeature = np.delete(breastCancerArrayCleaned, np.s_[-1:], axis=1)
+breastCancerFeature = np.delete(np.array(breastCancerArrayFeature, dtype=np.float), 0, axis = 1)
 benignClass = breastCancerFeature[rowsForBenign, :]
 malignantClass = breastCancerFeature[rowsForMalignant, :]
 
-classArray = np.zeros(breastCancerArrayRowsDeleted.shape[0])
+classArray = np.zeros(breastCancerArrayCleaned.shape[0])
 index = 0 
 while index <= classArray.shape[0]: 
     if (index in malignantClass):
@@ -126,17 +126,16 @@ evaluate_acc(breastCancerFeature, classArray, predictedClass)
 # Accuracy: 98.54 %
 print('--------------------')
 
-def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, BC, MC, k):
+def KfoldLDA(rawData, rawFeature, PV, NV, k):
     ''' 
     k-fold cross validation for LDA, rawData and rawFeature should be arrays;
-    Yindex is the position of the dependent variable in the rawData;
-    BV stands for benign value and MV stands for malignant value;
-    BC stands for benign count and MC stands for malignant count;
+    PV stands for positive value and NV stands for negative value;
     k is the folding number.
     '''
     # for example, rawData => breastCancerData, rawFeature => breastCancerFeature, Yindex => 10, BV = Benign Value => 2, MV = Malignant Value => 4
     dataSize = len(rawData)
     foldSize = int(dataSize / k)
+    Yindex = rawData.shape[1] - 1
 
     for i in range(k):
         print('K-fold validation iteration #', i)
@@ -148,42 +147,44 @@ def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, BC, MC, k):
         trainingData  = np.concatenate((rawData[: (i * foldSize)], rawData[((i + 1) * foldSize):]), axis = 0)
 
         # counting benign/malignant classes in training set
-        rowsForBenignKfold = np.where(trainingData[:, Yindex] == BV)[0]
-        rowsForMalignantKfold= np.where(trainingData[:, Yindex] == MV)[0]
-        benignClassKfold = trainingFeature[rowsForBenignKfold, :]
-        malignantClassKfold = trainingFeature[rowsForMalignantKfold, :]
+        rowsForPositive = np.where(trainingData[:, Yindex] == PV)[0]
+        rowsForNegative = np.where(trainingData[:, Yindex] == NV)[0]
+        positiveClass = trainingFeature[rowsForPositive, :]
+        negativeClass = trainingFeature[rowsForNegative, :]
 
         # validation set for evaluation
-        # counting benign/malignant classes in validation set
-        rowsForMalignantValidation = np.where(validationData[:, Yindex] == MV)[0]
-        malignantClassValidation = validationFeature[rowsForMalignantValidation, :]
+        # counting negative classes in validation set
+        rowsForNegativeValidation = np.where(validationData[:, Yindex] == NV)[0]
 
-        classArrayKfold = np.zeros(validationData.shape[0])
+        PC = np.count_nonzero(trainingData[:, Yindex] == PV, axis=0)
+        NC = np.count_nonzero(trainingData[:, Yindex] == NV, axis=0)
+
+        classArray = np.zeros(validationData.shape[0])
         index = 0 
-        while index <= classArrayKfold.shape[0]: 
-            if (index in rowsForMalignantValidation):
-                classArrayKfold[index] = 1
+        while index <= classArray.shape[0]: 
+            if (index in rowsForNegativeValidation):
+                classArray[index] = 1
             index = index + 1
 
         # Run LDA
-        ldaKfold = LDA(BC, MC)
-        startKfold = time.process_time()
-        testKfold = ldaKfold.fit(trainingFeature, benignClassKfold, malignantClassKfold, BC, MC)
-        endKfold = time.process_time()
-        print("Training Time: %.f s" % (endKfold-startKfold))
+        lda = LDA(PC, NC)
+        startTime = time.process_time()
+        fitFunction = lda.fit(trainingFeature, positiveClass, negativeClass, PC, NC)
+        endTime = time.process_time()
+        print("Training Time: %.f s" % (endTime-startTime))
         n = validationFeature.shape[0]
-        predictedClassKfold = np.zeros(n)
+        predictedClass = np.zeros(n)
         for j in range(n):
-            predictedClassKfold[j] = ldaKfold.predict(validationFeature[j, :])
-        evaluate_acc(validationFeature, classArrayKfold, predictedClassKfold)
+            predictedClass[j] = lda.predict(validationFeature[j, :])
+        evaluate_acc(validationFeature, classArray, predictedClass)
 
 
-KfoldLDA(breastCancerData, breastCancerFeature, 10, 2, 4, benignCount, MalignantCount, 5)
-wineData = np.array(wineQualityDataFrameDropLastColumn, dtype=np.float)
+KfoldLDA(breastCancerData, breastCancerFeature, 2, 4, 5)
+wineData = np.array(wineQualityDataFrameFeature, dtype=np.float)
 wineData = np.c_[wineData, qualityArray]
 # test subset of features
-wineData = np.delete(wineData, np.s_[5:7], axis = 1)
-wineFeatures = np.delete(wineFeatures, np.s_[5:7], axis = 1)
+#wineData = np.delete(wineData, np.s_[5:7], axis = 1)
+#wineFeatures = np.delete(wineFeatures, np.s_[5:7], axis = 1)
 #wineData = np.delete(wineData, np.s_[0:3], axis = 1)
 #wineFeatures = np.delete(wineFeatures, np.s_[0:3], axis = 1)
 #KfoldLDA(wineData, wineFeatures, 9, 0, 1, wineQualityZero, wineQualityOne, 5)
