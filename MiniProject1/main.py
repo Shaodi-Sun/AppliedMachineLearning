@@ -124,12 +124,14 @@ for i in range(n):
 evaluate_acc(breastCancerFeature, classArray, predictedClass)
 # Training Time: 0 s
 # Accuracy: 98.54 %
+print('--------------------')
 
-def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, k):
+def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, BC, MC, k):
     ''' 
     k-fold cross validation for LDA, rawData and rawFeature should be arrays;
     Yindex is the position of the dependent variable in the rawData;
     BV stands for benign value and MV stands for malignant value;
+    BC stands for benign count and MC stands for malignant count;
     k is the folding number.
     '''
     # for example, rawData => breastCancerData, rawFeature => breastCancerFeature, Yindex => 10, BV = Benign Value => 2, MV = Malignant Value => 4
@@ -148,8 +150,6 @@ def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, k):
         # counting benign/malignant classes in training set
         rowsForBenignKfold = np.where(trainingData[:, Yindex] == BV)[0]
         rowsForMalignantKfold= np.where(trainingData[:, Yindex] == MV)[0]
-        benignCountKfold = np.count_nonzero(trainingData[:, Yindex] == BV, axis=0)
-        malignantCountKfold = np.count_nonzero(trainingData[:, Yindex] == MV, axis=0)
         benignClassKfold = trainingFeature[rowsForBenignKfold, :]
         malignantClassKfold = trainingFeature[rowsForMalignantKfold, :]
 
@@ -166,9 +166,9 @@ def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, k):
             index = index + 1
 
         # Run LDA
-        ldaKfold = LDA(benignCountKfold, malignantCountKfold)
+        ldaKfold = LDA(BC, MC)
         startKfold = time.process_time()
-        testKfold = ldaKfold.fit(trainingFeature, benignClassKfold, malignantClassKfold, benignCountKfold, malignantCountKfold)
+        testKfold = ldaKfold.fit(trainingFeature, benignClassKfold, malignantClassKfold, BC, MC)
         endKfold = time.process_time()
         print("Training Time: %.f s" % (endKfold-startKfold))
         n = validationFeature.shape[0]
@@ -178,4 +178,8 @@ def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, k):
         evaluate_acc(validationFeature, classArrayKfold, predictedClassKfold)
 
 
-KfoldLDA(breastCancerData, breastCancerFeature, 10, 2, 4, 5)
+KfoldLDA(breastCancerData, breastCancerFeature, 10, 2, 4, benignCount, MalignantCount, 5)
+wineData = np.array(wineQualityDataFrameDropLastColumn, dtype=np.float)
+wineData = np.c_[wineData, qualityArray]
+KfoldLDA(wineData, wineFeatures, 11, 0, 1, wineQualityZero, wineQualityOne, 5)
+#print(wineData.shape[1])
