@@ -10,25 +10,25 @@ Python version: 3.7.4
 Package           Version
 ----------------- -------
 astroid           2.2.5  
-cycler            0.10.0 
-isort             4.3.21 
+cycler            0.10.0  
+isort             4.3.21  
 kiwisolver        1.1.0  
-lazy-object-proxy 1.4.2  
+lazy-object-proxy 1.4.2   
 matplotlib        3.1.1  
 mccabe            0.6.1  
-numpy             1.17.2 
-pandas            0.25.1 
-pip               19.2.3 
+numpy             1.17.2  
+pandas            0.25.1  
+pip               19.2.3  
 pylint            2.3.1  
 pyparsing         2.4.2  
 python-dateutil   2.8.0  
-pytz              2019.2 
-scipy             1.3.1  
-setuptools        41.2.0 
-six               1.12.0 
+pytz              2019.2  
+scipy             1.3.1   
+setuptools        41.2.0  
+six               1.12.0  
 typed-ast         1.4.0  
-wheel             0.33.6 
-wrapt             1.11.2
+wheel             0.33.6  
+wrapt             1.11.2  
 
 We also used os library to execute bash commands to install certain libraries, and download the raw datastes. 
 The sudo pip install command will prompt to enter password: 
