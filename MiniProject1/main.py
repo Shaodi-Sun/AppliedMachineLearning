@@ -72,7 +72,7 @@ rowsForMalignant= np.where(breastCancerArrayRowsDeleted[:, 10] == "4")[0]
 
 breastCancerData = np.array(breastCancerArrayRowsDeleted, dtype=np.float)
 breastCancerArrayDropLastColumn = np.delete(breastCancerArrayRowsDeleted, np.s_[-1:], axis=1)
-breastCancerFeature = np.array(breastCancerArrayDropLastColumn, dtype=np.float)
+breastCancerFeature = np.delete(np.array(breastCancerArrayDropLastColumn, dtype=np.float), 0, axis = 1)
 benignClass = breastCancerFeature[rowsForBenign, :]
 malignantClass = breastCancerFeature[rowsForMalignant, :]
 
@@ -161,7 +161,7 @@ def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, BC, MC, k):
         classArrayKfold = np.zeros(validationData.shape[0])
         index = 0 
         while index <= classArrayKfold.shape[0]: 
-            if (index in malignantClassValidation):
+            if (index in rowsForMalignantValidation):
                 classArrayKfold[index] = 1
             index = index + 1
 
@@ -181,5 +181,11 @@ def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, BC, MC, k):
 KfoldLDA(breastCancerData, breastCancerFeature, 10, 2, 4, benignCount, MalignantCount, 5)
 wineData = np.array(wineQualityDataFrameDropLastColumn, dtype=np.float)
 wineData = np.c_[wineData, qualityArray]
-KfoldLDA(wineData, wineFeatures, 11, 0, 1, wineQualityZero, wineQualityOne, 5)
+# test subset of features
+wineData = np.delete(wineData, np.s_[5:7], axis = 1)
+wineFeatures = np.delete(wineFeatures, np.s_[5:7], axis = 1)
+#wineData = np.delete(wineData, np.s_[0:3], axis = 1)
+#wineFeatures = np.delete(wineFeatures, np.s_[0:3], axis = 1)
+#KfoldLDA(wineData, wineFeatures, 9, 0, 1, wineQualityZero, wineQualityOne, 5)
 #print(wineData.shape[1])
+#print(wineFeatures.shape[1])
