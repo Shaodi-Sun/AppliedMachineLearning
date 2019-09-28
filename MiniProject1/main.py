@@ -125,55 +125,57 @@ evaluate_acc(breastCancerFeature, classArray, predictedClass)
 # Training Time: 0 s
 # Accuracy: 98.54 %
 
-# k-fold cross validation for LDA
-breastCancerDataSize = len(breastCancerArrayRowsDeleted)
-foldSize = int(breastCancerDataSize / 5)
-#print(breastCancerDataSize)
-for i in range(k):
-    print('Iteration #', i)
+def KfoldLDA(rawData, rawFeature, Yindex, BV, MV, k):
+    ''' 
+    k-fold cross validation for LDA, rawData and rawFeature should be arrays;
+    Yindex is the position of the dependent variable in the rawData;
+    BV stands for benign value and MV stands for malignant value;
+    k is the folding number.
+    '''
+    # for example, rawData => breastCancerData, rawFeature => breastCancerFeature, Yindex => 10, BV = Benign Value => 2, MV = Maglignant Value => 4
+    dataSize = len(rawData)
+    foldSize = int(dataSize / k)
 
-    breastCancerFoldValidationFeature = breastCancerFeature[(i * foldSize): ((i + 1) * foldSize)]
-    breastCancerFoldValidationData = breastCancerData[(i * foldSize): ((i + 1) * foldSize)]
-    #print(breastCancerFoldValidation)
-    #print(len(breastCancerFoldValidation))
-    breastCancerFoldTrainingFeature  = np.concatenate((breastCancerFeature[: (i * foldSize)], breastCancerFeature[((i + 1) * foldSize):]), axis = 0)
-    breastCancerFoldTrainingData  = np.concatenate((breastCancerData[: (i * foldSize)], breastCancerData[((i + 1) * foldSize):]), axis = 0)
-    #breastCancerFoldTraining = tuple(breastCancerFoldTraining)
-    #breastCancerFoldTrainingDeleted = tuple(breastCancerFoldTrainingDeleted)
-    #print(breastCancerFoldTraining)
+    for i in range(k):
+        print('K-fold validation iteration #', i)
 
-    # counting benign/malignant classes in training set
-    rowsForBenignKfold = np.where(breastCancerFoldTrainingData[:, 10] == 2)[0]
-    rowsForMaglignantKfold= np.where(breastCancerFoldTrainingData[:, 10] == 4)[0]
-    benignCountKfold = np.count_nonzero(breastCancerFoldTrainingData[:, 10] == 2, axis=0)
-    MaglignantCountKfold = np.count_nonzero(breastCancerFoldTrainingData[:, 10] == 4, axis=0)
-    benignClassKfold = breastCancerFoldTrainingFeature[rowsForBenignKfold, :]
-    maglignantClassKfold = breastCancerFoldTrainingFeature[rowsForMaglignantKfold, :]
+        validationFeature = rawFeature[(i * foldSize): ((i + 1) * foldSize)]
+        validationData = rawData[(i * foldSize): ((i + 1) * foldSize)]
 
-    # validation set for evaluation
-    # counting benign/malignant classes in validation set
-    rowsForMaglignantValidation = np.where(breastCancerFoldValidationData[:, 10] == 4)[0]
-    maglignantClassValidation = breastCancerFoldValidationFeature[rowsForMaglignantValidation, :]
+        trainingFeature  = np.concatenate((rawFeature[: (i * foldSize)], rawFeature[((i + 1) * foldSize):]), axis = 0)
+        trainingData  = np.concatenate((rawData[: (i * foldSize)], rawData[((i + 1) * foldSize):]), axis = 0)
 
-    classArrayKfold = np.zeros(breastCancerFoldValidationData.shape[0])
-    #print('aaaaaaaaaaaaaa', breastCancerFoldValidationDeleted)
-    #print('aaaaaaaaaaaaaa', rowsForMaglignantValidation)
-    index = 0 
-    while index <= classArrayKfold.shape[0]: 
-        if (index in maglignantClassValidation):
-            classArrayKfold[index] = 1
-        index = index + 1
-    #print(classArrayKfold)
+        # counting benign/malignant classes in training set
+        rowsForBenignKfold = np.where(trainingData[:, Yindex] == BV)[0]
+        rowsForMaglignantKfold= np.where(trainingData[:, Yindex] == MV)[0]
+        benignCountKfold = np.count_nonzero(trainingData[:, Yindex] == BV, axis=0)
+        maglignantCountKfold = np.count_nonzero(trainingData[:, Yindex] == MV, axis=0)
+        benignClassKfold = trainingFeature[rowsForBenignKfold, :]
+        maglignantClassKfold = trainingFeature[rowsForMaglignantKfold, :]
 
-    # Run LDA
-    ldaKfold = LDA(benignCountKfold, MaglignantCountKfold)
-    startKfold = time.process_time()
-    testKfold = ldaKfold.fit(breastCancerFoldTrainingFeature, benignClassKfold, maglignantClassKfold, benignCountKfold, MaglignantCountKfold)
-    endKfold = time.process_time()
-    print("Training Time: %.f s" % (endKfold-startKfold))
-    n = breastCancerFoldValidationFeature.shape[0]
-    predictedClassKfold = np.zeros(n)
-    for j in range(n):
-        predictedClassKfold[j] = ldaKfold.predict(breastCancerFoldValidationFeature[j, :])
-    evaluate_acc(breastCancerFoldValidationFeature, classArrayKfold, predictedClassKfold)
+        # validation set for evaluation
+        # counting benign/malignant classes in validation set
+        rowsForMaglignantValidation = np.where(validationData[:, Yindex] == MV)[0]
+        maglignantClassValidation = validationFeature[rowsForMaglignantValidation, :]
 
+        classArrayKfold = np.zeros(validationData.shape[0])
+        index = 0 
+        while index <= classArrayKfold.shape[0]: 
+            if (index in maglignantClassValidation):
+                classArrayKfold[index] = 1
+            index = index + 1
+
+        # Run LDA
+        ldaKfold = LDA(benignCountKfold, maglignantCountKfold)
+        startKfold = time.process_time()
+        testKfold = ldaKfold.fit(trainingFeature, benignClassKfold, maglignantClassKfold, benignCountKfold, maglignantCountKfold)
+        endKfold = time.process_time()
+        print("Training Time: %.f s" % (endKfold-startKfold))
+        n = validationFeature.shape[0]
+        predictedClassKfold = np.zeros(n)
+        for j in range(n):
+            predictedClassKfold[j] = ldaKfold.predict(validationFeature[j, :])
+        evaluate_acc(validationFeature, classArrayKfold, predictedClassKfold)
+
+
+KfoldLDA(breastCancerData, breastCancerFeature, 10, 2, 4, 5)
