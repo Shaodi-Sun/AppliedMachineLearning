@@ -15,6 +15,8 @@ from tempfile import TemporaryFile
 from toolFunctions import evaluate_acc
 from toolFunctions import excludeSegment
 from toolFunctions import partition
+from toolFunctions import normalize
+from toolFunctions import pca
 
 # main(['list'])
 # main(['show', 'wheel'])
@@ -74,16 +76,6 @@ malignantClass = breastCancerFeature[rowsForMalignant, :]
 
 classArray = np.zeros(breastCancerArrayCleaned.shape[0])
 classArray[rowsForMalignant] = 1
-
-def normalize(X):
-    '''
-    normalize X
-    '''
-    X_clone = np.copy(X)
-    # normalize features
-    for i in range(X.shape[1]):
-        X_clone[:,i] = np.divide(X_clone[:,i] - np.min(X_clone[:,i]),np.max(X_clone[:,i]) - np.min(X_clone[:,i]))
-    return X_clone
 
 def kfoldLR(X,y,k,a = 0.08, epsilon = 1e-3, power = 1):
     '''
@@ -146,25 +138,24 @@ def kfoldLR(X,y,k,a = 0.08, epsilon = 1e-3, power = 1):
         print("K-fold validation yields average training time of %.2f s" % avgtt)
         # K-fold validation yields average accuracy of 73.61 %
         return np.array([avgacc,avgtt])
-
-
+'''
 # test initial learning rate
 # wine data
 learningRate = np.arange(0.01,0.3,0.01)
-resultWine2 = np.zeros((learningRate.shape[0],2))
+resultWine = np.zeros((learningRate.shape[0],2))
 for i, a in enumerate(learningRate):
-    resultWine2[i,:] = kfoldLR(wineFeatures,qualityBinary,5, a, 1e-3)
+    resultWine[i,:] = kfoldLR(wineFeatures,qualityBinary,5, a, 1e-3)
 outfile = TemporaryFile()
-np.save(outfile, resultWine2)
-np.save('resultWine',resultWine2)
+np.save(outfile, resultWine)
+np.save('resultWine',resultWine)
 
 # breast cancer data
-resultBC2 = np.zeros((learningRate.shape[0],2))
+resultBC = np.zeros((learningRate.shape[0],2))
 for i, a in enumerate(learningRate):
-    resultBC2[i,:] = kfoldLR(breastCancerFeature,classArray,5, a, 1e-3)
+    resultBC[i,:] = kfoldLR(breastCancerFeature,classArray,5, a, 1e-3)
 outfile = TemporaryFile()
-np.save(outfile, resultBC2)
-np.save('resultBC2',resultBC2)
+np.save(outfile, resultBC)
+np.save('resultBC',resultBC)
 
 # test decay rate
 # wine data
@@ -179,16 +170,29 @@ for i, p in enumerate(power):
     resultBCPower[i,:] = kfoldLR(breastCancerFeature,classArray,5,0.1,1e-3,p)
 np.save('resultBCPower',resultBCPower)
 
-print(classArray)
-
-
-# test wine data feature
+# test wine data feature: drop one feature
 resultWineFeatures = np.zeros((wineFeatures.shape[1],2))
 for colToDelete in range(wineFeatures.shape[1]):
     wineFeatures_ = np.delete(wineFeatures, colToDelete, axis = 1)
-#     print(wineFeatures.shape)
-#     print(wineFeatures_.shape)
-    resultWineFeatures = kfoldLR(wineFeatures_,qualityBinary,5, 0.08, 1e-3)
-# np.save('resultWineFeatures',resultWineFeatures)
+    resultWineFeatures[colToDelete] = kfoldLR(wineFeatures_,qualityBinary,5, 0.08, 1e-3)
+np.save('resultWineFeatures',resultWineFeatures)
 
-# kfoldLR(breastCancerFeature,classArray,5,0.08,1e-3)
+# test wine data feature: PCA
+kfoldLR(pca(normalize(wineFeatures)),qualityBinary,5,0.08,1e-3)
+wineFeatures_ = np.delete(wineFeatures,[5,6], axis = 1)
+kfoldLR(wineFeatures_,qualityBinary,5,0.08,1e-3)
+
+
+# add feature = sqaure of one of the columns
+resultWineAddFeature = np.zeros((wineFeatures.shape[1],2))
+for colToPower in range(wineFeatures.shape[1]):
+    wineFeatures_ = np.c_[wineFeatures, np.power(wineFeatures[:,colToPower],2)]
+    resultWineAddFeature[colToPower] = kfoldLR(wineFeatures_,qualityBinary,5, 0.08, 1e-3)
+np.save('resultWineAddFeature2',resultWineAddFeature)
+'''
+print("---------Train on All Data---------")
+kfoldLR(wineFeatures, qualityBinary, 1)
+kfoldLR(breastCancerFeature, classArray, 1)
+print("---------K-fold validation---------")
+kfoldLR(wineFeatures,qualityBinary,5,0.08,1e-3)
+kfoldLR(breastCancerFeature,classArray,5,0.08,1e-3)

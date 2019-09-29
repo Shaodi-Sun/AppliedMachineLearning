@@ -14,7 +14,8 @@ from classification import LDA
 from toolFunctions import evaluate_acc
 from toolFunctions import excludeSegment
 from toolFunctions import partition
-
+from toolFunctions import normalize
+from toolFunctions import pca
 
 # main(['list'])
 # main(['show', 'wheel'])
@@ -141,8 +142,11 @@ def KfoldLDA(X, y, k):
         print("K-fold validation yields average training time of %.2f s" % avgtt)
         return np.array([avgacc, avgtt])
 
+print("---------Train on All Data---------")
 KfoldLDA(breastCancerFeature, classArray, 1)
 KfoldLDA(wineFeatures, qualityBinary, 1)
-print("---------")
+print("---------K-fold validation---------")
 KfoldLDA(breastCancerFeature, classArray, 5)
 KfoldLDA(wineFeatures, qualityBinary, 5)
+# KfoldLDA(pca(breastCancerFeature), classArray, 5)
+# KfoldLDA(pca(normalize(wineFeatures)), qualityBinary, 5)

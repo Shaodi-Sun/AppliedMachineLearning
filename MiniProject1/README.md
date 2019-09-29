@@ -44,7 +44,18 @@ Note that those commands only works if you already have Python and pip configure
 ### Project structure
 
 #### LDA files 
-The LDA model was being implemented in the file classification.py, class LDA. The evaluate_acc and k-fold cross validation of LDA model for both datasets were being implemented in the file main.py. You can execute the main.py file by the follwing command after have all prerequisite libraries set up. 
+The LDA model was being implemented in the file `classification.py`, class LDA. The k-fold cross validation of LDA model for both datasets were being implemented in the file `main.py`. You can execute the main.py file by the follwing command after have all prerequisite libraries set up. 
 ```
 python3 main.py
 ```
+
+#### Logistic Regression files 
+The logistic regression model was being implemented in the file `classification.py`, class LDA. The k-fold cross validation of LDA model for both datasets were being implemented in the file main.py. You can execute the `testLR.py` file by the follwing command after have all prerequisite libraries set up. 
+```
+python3 testLR.py
+```
+
+#### Others
+`plotLR.py`: contains script to create the plot for logistic regression in the report 
+`classification.py`: contains the logisitic regression and LDA implementation
+`toolFunctions.py`: contains helper function including the `evaluate_acc()`, and `normalize()`, and helper methods for kfold validation: `partition()` and `excludeSegment()`

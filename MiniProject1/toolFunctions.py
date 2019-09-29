@@ -1,6 +1,38 @@
 import math
 import numpy as np
 
+
+def normalize(X):
+    '''
+    normalize X
+    '''
+    X_clone = np.copy(X)
+    # normalize features
+    for i in range(X.shape[1]):
+        X_clone[:,i] = np.divide(X_clone[:,i] - np.min(X_clone[:,i]),np.max(X_clone[:,i]) - np.min(X_clone[:,i]))
+    return X_clone
+
+
+# PCA
+def pca(A):
+    # calculate the mean of each column
+    M = np.mean(A.T, axis=1)
+    # print(M)
+    # center columns by subtracting column means
+    C = A - M
+    # print(C)
+    # calculate covariance matrix of centered matrix
+    V = np.cov(C.T)
+    # print(V)
+    # eigendecomposition of covariance matrix
+    values, vectors = np.linalg.eig(V)
+    # print(vectors)
+    # print(values)
+    # project data
+    P = vectors.T.dot(C.T)
+    # print(P.T.shape)
+    return P.T
+
 def evaluate_acc(y, y_head):
     '''
     :param y: true class

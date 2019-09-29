@@ -100,23 +100,36 @@ plt.show()
 
 
 '''
-colToDelete = np.arang(1,12,1)
+colToDelete = np.arange(1,12,1)
 result = np.load('resultWineFeatures.npy')
 
+
+print(result)
 fig,ax1 = plt.subplots()
-ax1.set_title("Training Time, Accuracy vs. Initial Learning Rate")
-color = 'tab:red'
-ax1.set_xlabel('Feature')
-ax1.set_ylabel('Training Time (s)', color=color)
-ttline, = ax1.plot(colToDelete,result[:,1], color = color)
+color = 'tab:blue'
+ax1.set_xlabel('Index of Feature Dropped n ')
+ax1.set_ylabel('Accuracy(%)', color=color)  # we already handled the x-label with ax1
+accline, = ax1.plot(colToDelete,result[:,0],color = color)
+avgline, = ax1.plot(colToDelete, np.full(colToDelete.shape,73.92), color = color, linestyle='--')
 ax1.tick_params(axis='y', labelcolor=color)
 
-ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+fig.tight_layout()  # otherwise the right y-label is slightly clipped
+lg = ax1.legend([avgline,accline],['Accuracy(%)','Accuracy after dropping a feature X_n(%)'],loc='lower center')
+plt.show()
+
+
+
+colToPower = np.arange(1,12,1)
+result = np.load('resultWineAddFeature.npy')
+print(result)
+fig,ax1 = plt.subplots()
 color = 'tab:blue'
-ax2.set_ylabel('Accuracy(%)', color=color)  # we already handled the x-label with ax1
-accline, = ax2.plot(colToDelete,result[:,0],color = color)
-ax2.tick_params(axis='y', labelcolor=color)
+ax1.set_xlabel('Index of Feature Sqaured n')
+ax1.set_ylabel('Accuracy(%)', color=color)  # we already handled the x-label with ax1
+accline, = ax1.plot(colToPower,result[:,0],color = color)
+avgline, = ax1.plot(colToPower, np.full(colToDelete.shape,73.92), color = color, linestyle='--')
+ax1.tick_params(axis='y', labelcolor=color)
 
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
-# lg = ax1.legend([ttline,accline],['Training Time(s)','Accuracy(%)'],loc='lower center')
+lg = ax1.legend([avgline,accline],['Accuracy(%)','Accuracy after adding a feature X_n^2(%)'],loc='lower center')
 plt.show()
