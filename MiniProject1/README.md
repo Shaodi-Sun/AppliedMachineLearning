@@ -57,5 +57,7 @@ python3 testLR.py
 
 #### Others
 `plotLR.py`: contains script to create the plot for logistic regression in the report 
+
 `classification.py`: contains the logisitic regression and LDA implementation
+
 `toolFunctions.py`: contains helper function including the `evaluate_acc()`, and `normalize()`, and helper methods for kfold validation: `partition()` and `excludeSegment()`
