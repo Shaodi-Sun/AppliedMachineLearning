@@ -91,6 +91,7 @@ def kfoldLR(X,y,k,a = 0.08, epsilon = 1e-3, power = 1):
     # run kfoldLR(X,y,1) for training on all data and kfold(X,y,k) for k fold validation
 
     X_normalized = normalize(X)
+    X_normalized = np.c_[X_normalized, np.full(X_normalized.shape[0],1)]
     if (k == 1):
         lr = logisticRegression(X_normalized.shape[1])
         start = time.process_time()
@@ -190,6 +191,7 @@ for colToPower in range(wineFeatures.shape[1]):
     resultWineAddFeature[colToPower] = kfoldLR(wineFeatures_,qualityBinary,5, 0.08, 1e-3)
 np.save('resultWineAddFeature2',resultWineAddFeature)
 '''
+
 print("---------Train on All Data---------")
 kfoldLR(wineFeatures, qualityBinary, 1)
 kfoldLR(breastCancerFeature, classArray, 1)
